@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FailForward — Reverse Social Media</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- ========== PRELOADER ========== -->
+    <div id="preloader" class="preloader">
+        <div class="preloader-content">
+            <div class="glitch-wrapper">
+                <div class="glitch" data-text="FailForward">FailForward</div>
+            </div>
+            <p class="preloader-tagline">Loading raw truth...</p>
+            <div class="loading-bar"><div class="loading-bar-fill"></div></div>
+        </div>
+    </div>
+
+    <!-- ========== AUTH MODAL ========== -->
+    <div id="authModal" class="modal-overlay" style="display:none;">
+        <div class="modal">
+            <button class="modal-close" id="closeAuthModal">&times;</button>
+            <div class="modal-header">
+                <h2 id="authModalTitle">Join the Movement</h2>
+                <p id="authModalSubtitle">Share your real story. No filters.</p>
+            </div>
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">Log In</button>
+                <button class="auth-tab" data-tab="signup">Sign Up</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" class="auth-form">
+                <div class="form-group">
+                    <label for="loginEmail">Email or Username</label>
+                    <input type="text" id="loginEmail" placeholder="your@email.com or @username" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">Log In</button>
+                <div class="auth-divider"><span>or</span></div>
+                <button type="button" id="googleLoginBtn" class="btn btn-google btn-full">
+                    <i class="fab fa-google"></i> Continue with Google
+                </button>
+            </form>
+
+            <!-- Signup Form -->
+            <form id="signupForm" class="auth-form" style="display:none;">
+                <div class="form-group">
+                    <label for="signupName">Display Name</label>
+                    <input type="text" id="signupName" placeholder="Your Real Name" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupUsername">Unique Username</label>
+                    <div class="username-input-wrapper">
+                        <span class="username-prefix">@</span>
+                        <input type="text" id="signupUsername" placeholder="your_unique_id" required maxlength="20" pattern="[a-z0-9_]{3,20}">
+                    </div>
+                    <span id="usernameStatus" class="username-status"></span>
+                </div>
+                <div class="form-group">
+                    <label for="signupEmail">Email</label>
+                    <input type="email" id="signupEmail" placeholder="your@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupPassword">Password</label>
+                    <input type="password" id="signupPassword" placeholder="••••••••" minlength="6" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupBio">Bio (optional)</label>
+                    <input type="text" id="signupBio" placeholder="Recovering perfectionist..." maxlength="100">
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">Create Account</button>
+                <div class="auth-divider"><span>or</span></div>
+                <button type="button" id="googleSignupBtn" class="btn btn-google btn-full">
+                    <i class="fab fa-google"></i> Continue with Google
+                </button>
+            </form>
+
+            <div id="authError" class="auth-error" style="display:none;"></div>
+        </div>
+    </div>
+
+    <!-- ========== NAVIGATION ========== -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-logo">
+                <span class="logo-icon">↓</span>
+                <span class="logo-text">Fail<span class="logo-highlight">Forward</span></span>
+            </a>
+
+            <div class="nav-search" id="navSearch" style="display:none;">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search @users, failures, lessons...">
+                <div class="search-dropdown" id="searchDropdown" style="display:none;"></div>
+            </div>
+
+            <div class="nav-actions">
+                <button class="btn btn-ghost nav-link" data-section="feed" style="display:none;">
+                    <i class="fas fa-stream"></i> Feed
+                </button>
+                <button class="btn btn-ghost nav-link" data-section="reels" style="display:none;">
+                    <i class="fas fa-video"></i> Reels
+                </button>
+                <button class="btn btn-ghost nav-link" data-section="wisdom" style="display:none;">
+                    <i class="fas fa-brain"></i> Wisdom
+                </button>
+                <button class="btn btn-ghost nav-link" data-section="leaderboard" style="display:none;">
+                    <i class="fas fa-trophy"></i> Board
+                </button>
+                <button class="btn btn-primary" id="authBtn">Get Started</button>
+
+                <div class="user-menu" id="userMenu" style="display:none;">
+                    <div class="user-avatar" id="userAvatar">
+                        <span id="userInitial">?</span>
+                    </div>
+                    <div class="user-dropdown" id="userDropdown" style="display:none;">
+                        <div class="dropdown-header">
+                            <p class="dropdown-name" id="dropdownName">User</p>
+                            <p class="dropdown-email" id="dropdownEmail">email</p>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item" id="myPostsBtn">
+                            <i class="fas fa-user"></i> My Profile
+                        </button>
+                        <button class="dropdown-item" id="statsBtn">
+                            <i class="fas fa-chart-bar"></i> My Stats
+                        </button>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item text-danger" id="logoutBtn">
+                            <i class="fas fa-sign-out-alt"></i> Log Out
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ========== HERO SECTION (logged out) ========== -->
+    <section id="heroSection" class="hero">
+        <div class="hero-bg">
+            <div class="grid-lines"></div>
+            <div class="floating-words">
+                <span class="float-word" style="--delay:0s;--x:10%;--y:20%">failure</span>
+                <span class="float-word" style="--delay:2s;--x:80%;--y:30%">regret</span>
+                <span class="float-word" style="--delay:4s;--x:30%;--y:60%">lesson</span>
+                <span class="float-word" style="--delay:1s;--x:70%;--y:70%">lost $$$</span>
+                <span class="float-word" style="--delay:3s;--x:50%;--y:40%">bad decision</span>
+                <span class="float-word" style="--delay:5s;--x:20%;--y:80%">mistake</span>
+                <span class="float-word" style="--delay:2.5s;--x:60%;--y:15%">growth</span>
+                <span class="float-word" style="--delay:3.5s;--x:40%;--y:85%">truth</span>
+            </div>
+        </div>
+        <div class="hero-content">
+            <div class="hero-badge">🔻 The Anti-Highlight Reel</div>
+            <h1 class="hero-title">
+                Stop Faking.<br>
+                Start <span class="text-gradient">Failing Forward.</span>
+            </h1>
+            <p class="hero-subtitle">
+                The social network where you share your <strong>failures</strong>, <strong>regrets</strong>, 
+                <strong>bad decisions</strong>, and <strong>lost money</strong>. 
+                Our AI extracts <em>real wisdom</em> so everyone learns.
+            </p>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <span class="stat-number" id="totalPosts">0</span>
+                    <span class="stat-label">Confessions</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="stat-number" id="totalUsers">0</span>
+                    <span class="stat-label">Truth-Tellers</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="stat-number" id="totalWisdom">0</span>
+                    <span class="stat-label">Wisdom Extracted</span>
+                </div>
+            </div>
+            <div class="hero-cta">
+                <button class="btn btn-primary btn-lg" id="heroAuthBtn">
+                    <i class="fas fa-pen"></i> Confess Your Failure
+                </button>
+                <button class="btn btn-ghost btn-lg" id="browseBtn">
+                    <i class="fas fa-eye"></i> Browse Failures
+                </button>
+            </div>
+            <div class="hero-categories">
+                <span class="category-pill">💸 Lost Money</span>
+                <span class="category-pill">💔 Relationship Fails</span>
+                <span class="category-pill">🏢 Career Mistakes</span>
+                <span class="category-pill">📉 Bad Investments</span>
+                <span class="category-pill">🎓 Lessons Learned</span>
+                <span class="category-pill">😤 Regrets</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== MAIN APP (logged in) ========== -->
+    <main id="mainApp" class="main-app" style="display:none;">
+        <div class="app-container">
+
+            <!-- ========== LEFT SIDEBAR ========== -->
+            <aside class="sidebar sidebar-left">
+                <div class="sidebar-card user-profile-card" id="profileCard">
+                    <div class="profile-header">
+                        <div class="profile-avatar" id="profileAvatar">
+                            <span id="profileInitial">?</span>
+                        </div>
+                        <h3 id="profileName">User</h3>
+                        <p class="profile-title">Truth-Teller</p>
+                    </div>
+                    <div class="profile-stats">
+                        <div class="p-stat">
+                            <span class="p-stat-num" id="myPostCount">0</span>
+                            <span class="p-stat-label">Confessions</span>
+                        </div>
+                        <div class="p-stat">
+                            <span class="p-stat-num" id="myResonateCount">0</span>
+                            <span class="p-stat-label">Resonated</span>
+                        </div>
+                        <div class="p-stat">
+                            <span class="p-stat-num" id="myWisdomCount">0</span>
+                            <span class="p-stat-label">Wisdom Given</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <h4 class="sidebar-title"><i class="fas fa-filter"></i> Categories</h4>
+                    <div class="category-search-wrapper">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="categorySearch" placeholder="Search categories...">
+                    </div>
+                    <div class="category-filters" id="categoryFilters">
+                        <!-- Categories will be rendered by JS -->
+                    </div>
+                    <button class="show-more-btn" id="showMoreCategories">
+                        <span class="show-more-text">Show More</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+
+                <div class="sidebar-card">
+                    <h4 class="sidebar-title"><i class="fas fa-fire"></i> Trending Tags</h4>
+                    <div class="trending-tags" id="trendingTags">
+                        <span class="tag">#startup-fail</span>
+                        <span class="tag">#crypto-loss</span>
+                        <span class="tag">#career-regret</span>
+                        <span class="tag">#relationship</span>
+                        <span class="tag">#college-mistake</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- ========== MAIN CONTENT ========== -->
+            <div class="content-main">
+
+                <!-- ========== FEED SECTION ========== -->
+                <section id="feedSection">
+                    <!-- Create Post Card -->
+                    <div class="create-post-card" id="createPostCard">
+                        <div class="create-post-header">
+                            <div class="create-avatar" id="createAvatar">
+                                <span id="createInitial">?</span>
+                            </div>
+                            <button class="create-post-trigger" id="openCreatePost">
+                                What went wrong? Share your story...
+                            </button>
+                        </div>
+                        <div class="create-post-categories" id="quickCategories">
+                            <!-- Top 6 will be rendered by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Create Post Expanded -->
+                    <div class="create-post-expanded" id="createPostExpanded" style="display:none;">
+                        <div class="expanded-header">
+                            <h3><i class="fas fa-pen-nib"></i> New Confession</h3>
+                            <button class="btn btn-ghost btn-sm" id="closeCreatePost">&times;</button>
+                        </div>
+                        <form id="createPostForm">
+                            <div class="form-group">
+                                <input type="text" id="postTitle" placeholder="Title your failure / lesson..." class="post-title-input" required>
+                            </div>
+                            <div class="form-group">
+                                <textarea id="postContent" placeholder="Tell us what happened. Be raw. Be real. What went wrong? What did you lose? What did you learn?" rows="6" required></textarea>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group form-half">
+                                    <label>Category</label>
+                                    <div class="category-picker-wrapper">
+                                        <button type="button" id="categoryPickerBtn" class="category-picker-btn">
+                                            <span id="selectedCategoryDisplay">📌 Select category...</span>
+                                            <i class="fas fa-chevron-down"></i>
+                                        </button>
+                                        <input type="hidden" id="postCategory" required>
+                                        <div class="category-picker-dropdown" id="categoryPickerDropdown" style="display:none;">
+                                            <div class="category-picker-search">
+                                                <i class="fas fa-search"></i>
+                                                <input type="text" id="categoryPickerSearch" placeholder="Search categories...">
+                                            </div>
+                                            <div class="category-picker-list" id="categoryPickerList"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group form-half">
+                                    <label>Money Lost (optional)</label>
+                                    <input type="number" id="postMoneyLost" placeholder="$0" min="0">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Tags (comma separated)</label>
+                                <input type="text" id="postTags" placeholder="startup, investment, crypto, career...">
+                            </div>
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="postAnonymous">
+                                    <span class="checkmark"></span>
+                                    Post anonymously
+                                </label>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-ghost" id="cancelPost">Cancel</button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane"></i> Confess
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Sort Bar -->
+                    <div class="sort-bar">
+                        <button class="sort-btn active" data-sort="recent">
+                            <i class="fas fa-clock"></i> Recent
+                        </button>
+                        <button class="sort-btn" data-sort="resonated">
+                            <i class="fas fa-heart"></i> Most Resonated
+                        </button>
+                        <button class="sort-btn" data-sort="money">
+                            <i class="fas fa-dollar-sign"></i> Biggest Loss
+                        </button>
+                        <button class="sort-btn" data-sort="wisdom">
+                            <i class="fas fa-lightbulb"></i> Most Wisdom
+                        </button>
+                    </div>
+
+                    <!-- Posts Feed -->
+                    <div id="postsFeed" class="posts-feed">
+                        <div class="loading-posts">
+                            <div class="spinner"></div>
+                            <p>Loading confessions...</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========== REELS SECTION ========== -->
+                <section id="reelsSection" style="display:none;">
+                    <div class="reels-header">
+                        <div>
+                            <h2><i class="fas fa-video"></i> Failure Reels</h2>
+                            <p>Short video confessions. Real stories, raw emotion.</p>
+                        </div>
+                        <button class="btn btn-primary" id="uploadReelBtn">
+                            <i class="fas fa-plus"></i> Upload Reel
+                        </button>
+                    </div>
+                    <div class="reels-container" id="reelsContainer">
+                        <div class="reels-loading">
+                            <div class="spinner"></div>
+                            <p>Loading reels...</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========== WISDOM SECTION ========== -->
+                <section id="wisdomSection" style="display:none;">
+                    <div class="wisdom-header">
+                        <h2><i class="fas fa-brain"></i> AI Wisdom Dashboard</h2>
+                        <p>Patterns and insights extracted from collective failures</p>
+                    </div>
+                    <div class="wisdom-grid">
+                        <div class="wisdom-card wisdom-card-large">
+                            <div class="wisdom-card-header">
+                                <i class="fas fa-chart-line"></i>
+                                <h3>Top Failure Patterns</h3>
+                            </div>
+                            <div id="failurePatterns" class="wisdom-content">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                        <div class="wisdom-card">
+                            <div class="wisdom-card-header">
+                                <i class="fas fa-dollar-sign"></i>
+                                <h3>Money Lost Trends</h3>
+                            </div>
+                            <div id="moneyTrends" class="wisdom-content">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                        <div class="wisdom-card">
+                            <div class="wisdom-card-header">
+                                <i class="fas fa-lightbulb"></i>
+                                <h3>Top Lessons</h3>
+                            </div>
+                            <div id="topLessons" class="wisdom-content">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                        <div class="wisdom-card wisdom-card-large">
+                            <div class="wisdom-card-header">
+                                <i class="fas fa-quote-left"></i>
+                                <h3>Wisdom of the Day</h3>
+                            </div>
+                            <div id="wisdomOfDay" class="wisdom-content">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                        <div class="wisdom-card">
+                            <div class="wisdom-card-header">
+                                <i class="fas fa-users"></i>
+                                <h3>Common Regrets by Age</h3>
+                            </div>
+                            <div id="regretsByAge" class="wisdom-content">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                        <div class="wisdom-card">
+                            <div class="wisdom-card-header">
+                                <i class="fas fa-tags"></i>
+                                <h3>Category Breakdown</h3>
+                            </div>
+                            <div id="categoryBreakdown" class="wisdom-content">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========== LEADERBOARD SECTION ========== -->
+                <section id="leaderboardSection" style="display:none;">
+                    <div class="leaderboard-header">
+                        <h2><i class="fas fa-trophy"></i> Hall of Failure</h2>
+                        <p>The bravest truth-tellers. Ranked by vulnerability and wisdom shared.</p>
+                    </div>
+                    <div class="leaderboard-tabs">
+                        <button class="lb-tab active" data-lb="vulnerable">Most Vulnerable</button>
+                        <button class="lb-tab" data-lb="wise">Most Wise</button>
+                        <button class="lb-tab" data-lb="money">Biggest Losses</button>
+                    </div>
+                    <div id="leaderboardContent" class="leaderboard-list">
+                        <div class="spinner"></div>
+                    </div>
+                </section>
+
+                <!-- ========== PROFILE SECTION ========== -->
+                <section id="profileSection" style="display:none;">
+                    <div class="profile-page" id="profilePage">
+                        <div class="spinner"></div>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- ========== RIGHT SIDEBAR ========== -->
+            <aside class="sidebar sidebar-right">
+                <div class="sidebar-card ai-insight-card">
+                    <div class="ai-badge"><i class="fas fa-robot"></i> AI Insight</div>
+                    <h4>Today's Pattern</h4>
+                    <p id="aiInsight">Loading wisdom...</p>
+                    <div class="insight-meta">
+                        <span id="insightBased">Based on 0 confessions</span>
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <h4 class="sidebar-title"><i class="fas fa-chart-pie"></i> Failure Stats</h4>
+                    <div class="mini-stats">
+                        <div class="mini-stat">
+                            <div class="mini-stat-bar">
+                                <div class="mini-stat-fill" style="width:35%;" data-cat="failure"></div>
+                            </div>
+                            <span class="mini-stat-label">Failures</span>
+                            <span class="mini-stat-pct" id="failurePct">35%</span>
+                        </div>
+                        <div class="mini-stat">
+                            <div class="mini-stat-bar">
+                                <div class="mini-stat-fill" style="width:25%;" data-cat="regret"></div>
+                            </div>
+                            <span class="mini-stat-label">Regrets</span>
+                            <span class="mini-stat-pct" id="regretPct">25%</span>
+                        </div>
+                        <div class="mini-stat">
+                            <div class="mini-stat-bar">
+                                <div class="mini-stat-fill" style="width:20%;" data-cat="lesson"></div>
+                            </div>
+                            <span class="mini-stat-label">Lessons</span>
+                            <span class="mini-stat-pct" id="lessonPct">20%</span>
+                        </div>
+                        <div class="mini-stat">
+                            <div class="mini-stat-bar">
+                                <div class="mini-stat-fill" style="width:15%;" data-cat="money"></div>
+                            </div>
+                            <span class="mini-stat-label">Money Lost</span>
+                            <span class="mini-stat-pct" id="moneyPct">15%</span>
+                        </div>
+                        <div class="mini-stat">
+                            <div class="mini-stat-bar">
+                                <div class="mini-stat-fill" style="width:5%;" data-cat="decision"></div>
+                            </div>
+                            <span class="mini-stat-label">Bad Decisions</span>
+                            <span class="mini-stat-pct" id="decisionPct">5%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <h4 class="sidebar-title"><i class="fas fa-gem"></i> Top Wisdom Nuggets</h4>
+                    <div class="wisdom-nuggets" id="wisdomNuggets">
+                        <div class="nugget">
+                            <p>"Every failure is just a data point for your next success."</p>
+                            <span class="nugget-source">— Extracted from 47 confessions</span>
+                        </div>
+                        <div class="nugget">
+                            <p>"The money you lost taught you more than any course could."</p>
+                            <span class="nugget-source">— Extracted from 23 confessions</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <h4 class="sidebar-title"><i class="fas fa-dollar-sign"></i> Total Money Lost</h4>
+                    <div class="total-money-lost">
+                        <span class="money-amount" id="totalMoneyLost">$0</span>
+                        <span class="money-label">collective lessons paid</span>
+                    </div>
+                </div>
+            </aside>
+
+        </div>
+    </main>
+
+    <!-- ========== UPLOAD REEL MODAL ========== -->
+    <div id="uploadReelModal" class="modal-overlay" style="display:none;">
+        <div class="modal upload-reel-modal">
+            <button class="modal-close" id="closeUploadModal">&times;</button>
+            <div class="modal-header">
+                <h2><i class="fas fa-video"></i> Upload Failure Reel</h2>
+                <p>Share your story • Free hosting via Cloudinary</p>
+            </div>
+
+            <form id="uploadReelForm">
+                <div class="upload-area" id="uploadArea">
+                    <input type="file" id="videoFile" accept="video/*" hidden>
+                    <div class="upload-placeholder" id="uploadPlaceholder">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h3>Click or drag video here</h3>
+                        <p>MP4, WebM, MOV • Max 50MB • Max 60s</p>
+                    </div>
+                    <div class="upload-preview" id="uploadPreview" style="display:none;">
+                        <video id="previewVideo" controls></video>
+                        <button type="button" class="change-video-btn" id="changeVideoBtn">
+                            <i class="fas fa-sync"></i> Change Video
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Caption</label>
+                    <textarea id="reelCaption" placeholder="Tell your story in one line..." rows="2" maxlength="200" required></textarea>
+                    <span class="char-count"><span id="captionCount">0</span>/200</span>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group form-half">
+                        <label>Category</label>
+                        <div class="category-picker-wrapper">
+                            <button type="button" id="reelCategoryBtn" class="category-picker-btn">
+                                <span id="reelSelectedCategory">📌 Select category...</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <input type="hidden" id="reelCategory" required>
+                            <div class="category-picker-dropdown" id="reelCategoryDropdown" style="display:none;">
+                                <div class="category-picker-search">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" id="reelCategorySearch" placeholder="Search...">
+                                </div>
+                                <div class="category-picker-list" id="reelCategoryList"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group form-half">
+                        <label>Tags (optional)</label>
+                        <input type="text" id="reelTags" placeholder="startup, regret, lesson">
+                    </div>
+                </div>
+
+                <div class="upload-progress" id="uploadProgress" style="display:none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <span id="progressText">Uploading to Cloudinary... 0%</span>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-ghost" id="cancelUpload">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="submitUpload">
+                        <i class="fas fa-paper-plane"></i> Post Reel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== TOAST CONTAINER ========== -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- ========== FIREBASE SDK ========== -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <!-- ========== CLOUDINARY WIDGET ========== -->
+    <script src="https://upload-widget.cloudinary.com/global/all.js"></script>
+
+    <!-- ========== APP SCRIPTS (order matters!) ========== -->
+    <!-- Make sure all these JS files exist in your js folder -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/cloudinary-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/categories.js"></script>
+    <script src="js/ai-wisdom.js"></script>
+    <script src="js/posts.js"></script>
+    <script src="js/profile.js"></script>
+    <script src="js/reels.js"></script>
+    <script src="js/app.js"></script>
+
+    <!-- Fallback error handler -->
+    <script>
+        // Global error handler to catch any JS errors
+        window.addEventListener('error', function(e) {
+            console.error('Global error:', e.error);
+            // You can show a toast notification here if needed
+        });
+        
+        // Check if all modules loaded properly
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                if (typeof Auth === 'undefined') console.error('Auth module not loaded!');
+                if (typeof Categories === 'undefined') console.error('Categories module not loaded!');
+                if (typeof Reels === 'undefined') console.error('Reels module not loaded!');
+                if (typeof App === 'undefined') console.error('App module not loaded!');
+            }, 1000);
+        });
+    </script>
+
+</body>
+</html>
